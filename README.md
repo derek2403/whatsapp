@@ -1,13 +1,20 @@
-# WhatsApp Insurance Agent Demo Bot
+# WhatsApp & Voice Insurance Agent Demo Bot
 
-A conversational WhatsApp bot that simulates a friendly insurance sales agent, powered by **Twilio WhatsApp Sandbox** and **OpenAI GPT-4o-mini**.
+A conversational bot that simulates a friendly insurance sales agent via **WhatsApp text** and **Voice calls**, powered by **Twilio**, **OpenAI**, and **ElevenLabs TTS**.
 
 ## Features
 
+### WhatsApp Text Bot
 - 🤖 **Natural conversation** - Powered by OpenAI, responds like a real sales agent
 - 📊 **Lead classification** - Automatically categorizes leads as Hot/Warm/Cold
 - ⏰ **Smart follow-ups** - Scheduled nudges based on lead temperature
 - 🎮 **Demo-friendly** - Configurable timing for quick demonstrations
+
+### Voice Call Bot (NEW!)
+- 🎤 **Real-time voice calls** - Powered by Twilio ConversationRelay
+- 🗣️ **ElevenLabs TTS** - High-quality, human-like text-to-speech
+- ⚡ **Interruptible** - Users can speak over the AI naturally
+- 🔄 **Same AI brain** - Uses the same OpenAI prompts as the WhatsApp bot
 
 ## Quick Start
 
@@ -124,11 +131,58 @@ The bot automatically classifies leads based on message content:
 
 ## API Endpoints
 
-### `GET /`
-Health check - returns current bot state
+### WhatsApp Bot (port 3000)
+- `GET /` - Health check, returns current bot state
+- `POST /whatsapp` - Twilio webhook for incoming WhatsApp messages
 
-### `POST /whatsapp`
-Twilio webhook endpoint for incoming messages
+### Voice Bot (port 8080)
+- `GET /` - Health check, returns voice bot status
+- `GET /twiml` - Returns TwiML with ConversationRelay config
+- `WS /ws` - WebSocket endpoint for real-time voice conversation
+
+---
+
+## Voice Bot Setup (ElevenLabs + Twilio)
+
+### 1. Get your credentials
+
+| Service | What you need |
+|---------|---------------|
+| ElevenLabs | API Key from [elevenlabs.io/api](https://elevenlabs.io/api) |
+| ElevenLabs | Voice ID from [Voice Library](https://elevenlabs.io/voice-library) |
+| Twilio | Voice-capable phone number (not just SMS) |
+
+### 2. Update your `.env`
+
+```bash
+ELEVENLABS_API_KEY=your_api_key
+ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL
+NGROK_URL=your-subdomain.ngrok.app
+VOICE_PORT=8080
+```
+
+### 3. Start ngrok and the server
+
+```bash
+# Terminal 1: Start ngrok
+ngrok http 8080
+
+# Terminal 2: Start voice server (with ngrok URL in .env)
+npm run voice
+```
+
+### 4. Configure Twilio Voice
+
+1. Go to [Twilio Console](https://console.twilio.com) → Phone Numbers
+2. Select your Voice-capable number
+3. Under "A call comes in", set:
+   - Webhook URL: `https://your-ngrok-url.ngrok.app/twiml`
+   - HTTP Method: **GET**
+4. Save
+
+### 5. Call your Twilio number!
+
+You should hear the AI greeting in ElevenLabs voice. Say hello and have a conversation! 🎤
 
 ---
 
@@ -136,11 +190,12 @@ Twilio webhook endpoint for incoming messages
 
 ```
 whatsapp/
-├── index.js        # Main application
-├── package.json    # Dependencies
-├── .env.example    # Environment template
-├── .env            # Your configuration (gitignored)
-└── README.md       # This file
+├── index.js          # WhatsApp text bot (Express)
+├── voice-server.js   # Voice call bot (Fastify + WebSocket)
+├── package.json      # Dependencies
+├── .env.example      # Environment template
+├── .env              # Your configuration (gitignored)
+└── README.md         # This file
 ```
 
 ---
